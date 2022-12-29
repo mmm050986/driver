@@ -32,12 +32,24 @@ curveTL = pygame.image.load("/Users/matthewmontgomery/Desktop/Driver Pro/curveTL
 curveTL = pygame.transform.scale(curveTL,(150,150))
 curveBR = pygame.image.load("/Users/matthewmontgomery/Desktop/Driver Pro/curveBR.gif").convert()
 curveBR = pygame.transform.scale(curveBR,(150,150))
+longcurveBR = pygame.image.load("/Users/matthewmontgomery/Desktop/Driver Pro/longlongcurveBR.gif").convert()
+longcurveBR = pygame.transform.scale(longcurveBR,(392,288))
+longcurveTR = pygame.image.load("/Users/matthewmontgomery/Desktop/Driver Pro/longlongcurveTR.gif").convert()
+longcurveTR = pygame.transform.scale(longcurveTR,(288,392))
 curveTR = pygame.image.load("/Users/matthewmontgomery/Desktop/Driver Pro/curveTR.gif").convert()
 curveTR = pygame.transform.scale(curveTR,(150,150))
 startvertical = pygame.image.load("/Users/matthewmontgomery/Desktop/Driver Pro/startvertical.gif").convert()
 startvertical = pygame.transform.scale(startvertical,(100,30))
 starthorizontal = pygame.image.load("/Users/matthewmontgomery/Desktop/Driver Pro/starthorizontal.gif").convert()
 starthorizontal = pygame.transform.scale(starthorizontal,(30,100))
+tree1 = pygame.image.load("/Users/matthewmontgomery/Desktop/Driver Pro/tree1.gif").convert()
+tree1 = pygame.transform.scale(tree1,(60,60))
+tree2 = pygame.image.load("/Users/matthewmontgomery/Desktop/Driver Pro/tree2.gif").convert()
+tree2 = pygame.transform.scale(tree2,(60,60))
+tree3 = pygame.image.load("/Users/matthewmontgomery/Desktop/Driver Pro/tree3.gif").convert()
+tree3 = pygame.transform.scale(tree3,(60,60))
+tree4 = pygame.image.load("/Users/matthewmontgomery/Desktop/Driver Pro/tree3.gif").convert()
+tree4 = pygame.transform.scale(tree4,(20,20))
 
 font1 = pygame.font.Font(None, 32)
 
@@ -51,6 +63,8 @@ previous_lap_text = font1.render('Previous Lap:', True, (0,0,0))
 previous_lap_textRect = previous_lap_text.get_rect()
 best_lap_text = font1.render('', True, (0,0,0))
 best_lap_textRect = best_lap_text.get_rect()
+speed_text = font1.render('', True, (0,0,0))
+speed_textRect = speed_text.get_rect()
 
 global checkpoints
 checkpoints = []
@@ -62,6 +76,63 @@ bestLapSeconds = 0
 best_lap = ""
 previous_lap = ""
 global race_length
+global treeTopLeft
+treeTopLeft = (0,0)
+global cantSetTreeHere
+cantSetTreeHere = True
+
+class TreeTrunk(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+
+        self.surf = tree4
+        self.image = tree4
+      
+        self.image.set_colorkey((0, 0,0), RLEACCEL)
+        self.rect = tree4.get_rect(center=(
+                300,
+                300,
+            ))
+
+
+class Tree1(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+
+        self.surf = tree1
+        self.image = tree1
+      
+        self.image.set_colorkey((0, 0,0), RLEACCEL)
+        self.rect = tree1.get_rect(center=(
+                300,
+                300,
+            ))
+
+class Tree2(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+
+        self.surf = tree2
+        self.image = tree2
+      
+        self.image.set_colorkey((0, 0,0), RLEACCEL)
+        self.rect = tree2.get_rect(center=(
+                300,
+                300,
+            ))
+
+class Tree3(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+
+        self.surf = tree3
+        self.image = tree3
+      
+        self.image.set_colorkey((0, 0,0), RLEACCEL)
+        self.rect = tree3.get_rect(center=(
+                300,
+                300,
+            ))
 
 
 
@@ -74,6 +145,58 @@ class StartVerticalTrack(pygame.sprite.Sprite):
       
         self.image.set_colorkey((0, 0,0), RLEACCEL)
         self.rect = startvertical.get_rect(center=(
+                300,
+                300,
+            ))
+
+class ShortVerticalTrack(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+
+        self.surf = shortvertical
+        self.image = shortvertical
+      
+        self.image.set_colorkey((0, 0,0), RLEACCEL)
+        self.rect = shortvertical.get_rect(center=(
+                300,
+                300,
+            ))
+
+class ShortHorizontalTrack(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+
+        self.surf = shorthorizontal
+        self.image = shorthorizontal
+      
+        self.image.set_colorkey((0, 0,0), RLEACCEL)
+        self.rect = shorthorizontal.get_rect(center=(
+                300,
+                300,
+            ))
+
+class LongCurveBRTrack(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+
+        self.surf = longcurveBR
+        self.image = longcurveBR
+      
+        self.image.set_colorkey((0, 0,0), RLEACCEL)
+        self.rect = longcurveBR.get_rect(center=(
+                300,
+                300,
+            ))
+
+class LongCurveTRTrack(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+
+        self.surf = longcurveTR
+        self.image = longcurveTR
+      
+        self.image.set_colorkey((0, 0,0), RLEACCEL)
+        self.rect = longcurveTR.get_rect(center=(
                 300,
                 300,
             ))
@@ -212,10 +335,14 @@ class Car(pygame.sprite.Sprite):
         self.turnspeed = 1
         self.onTrack = False
         self.lapsCompleted = 0
+        self.kmh = 0
+        self.reversing = False
         
 
     def update(self):
        
+        if self.accelerate == True and self.speed == 0:
+            self.reversing = False
 
         #change direction of car if on track
         if self.onTrack == True:
@@ -233,13 +360,13 @@ class Car(pygame.sprite.Sprite):
         #change direction of car if off track
         if self.onTrack == False:
 
-            if self.turnleft == True and self.speed>1.5:
-                self.turnspeed = (25 - self.speed) / 6
+            if self.turnleft == True and self.speed>1:
+                self.turnspeed = (28 - self.speed) / 4
                 self.direction += self.turnspeed
                 if self.direction >=360:
                     self.direction = 0
-            if self.turnright == True and self.speed>1.5:
-                self.turnspeed = (25 - self.speed) / 6
+            if self.turnright == True and self.speed>1:
+                self.turnspeed = (28 - self.speed) / 4
                 self.direction -= self.turnspeed
                 if self.direction <=-360:
                     self.direction = 0
@@ -265,6 +392,13 @@ class Car(pygame.sprite.Sprite):
         if self.orientation == 3:
             self.angle -=90
             self.angle *=-1
+        
+        if self.angle > self.previousangle:
+            if self.angle - self.previousangle > 30:
+                self.angle -=20
+        if self.angle < self.previousangle:
+            if self.previousangle - self.angle > 30:
+                self.angle +=20
 
         if self.chaseminangle == False and self.chasemaxangle == False:
            
@@ -289,7 +423,21 @@ class Car(pygame.sprite.Sprite):
 
         
         wait = False
-        traction = 4 - self.speed/8
+
+        if self.onTrack == True:
+            if self.speed<=10:
+                traction = 7 - self.speed/5
+            elif self.speed <=15:
+                traction = 3
+            elif self.speed <=20:
+                traction = 2.7
+            elif self.speed <=30:
+                traction = 1.5
+        if self.onTrack == False:
+            traction = 5 - self.speed/4  
+
+        if self.accelerate == True:
+            traction -=0.5 
 
         if self.chaseminangle == True:
             if (self.previousangle - self.minangle) > traction:
@@ -314,31 +462,69 @@ class Car(pygame.sprite.Sprite):
                 self.currentorientation = self.orientation
 
 
-        print(traction)
+
         
 
       
        
 
-        if self.accelerate == True and self.onTrack == True and self.speed<20:
+        if self.accelerate == True and self.reversing == False and self.onTrack == True and self.speed<30:
             
             if self.speed == 0:
                 self.speed = 1.5
-            self.speed +=0.4
-        if self.accelerate == True and self.onTrack == False and self.speed<5:
-            if self.speed == 0:
-                self.speed = 1
-            self.speed +=0.4
-        if self.accelerate == False and self.speed>0:
+            if self.speed < 5:
+                if self.turnleft == False and self.turnright == False:
+                    self.speed +=0.9
+                else:
+                    self.speed +=0.3
+            if self.speed >= 5 and self.speed <10:
+                if self.turnleft == False and self.turnright == False:
+                    self.speed +=0.6
+                else:
+                    self.speed +=0.3
+            if self.speed >= 10 and self.speed <15:
+                if self.turnleft == False and self.turnright == False:
+                    self.speed +=0.4
+                else:
+                    self.speed +=0.2
+            if self.speed >= 15 and self.speed <30:
+                if self.turnleft == False and self.turnright == False:
+                    self.speed +=0.3
+                else:
+                    self.speed +=0.1
+
+
+        if self.accelerate == True and self.reversing == True and self.speed>0:
             self.speed -=0.4
             if self.speed <=1.5:
                 self.speed = 0
-        
-        if self.reverse == True and self.speed>0:
-            self.speed -=0.3
+
+        if self.accelerate == True and self.reversing == False and self.onTrack == False and self.speed<8:
+            if self.speed == 0:
+                self.speed = 1
+            self.speed +=0.2
+
+        if self.accelerate == False and self.reverse == False and self.speed>0:
+            self.speed -=0.4
+            if self.speed <=1.5:
+                self.speed = 0
+    
+        if self.reverse == True and self.reversing == False and self.speed>0:
+            self.speed -=0.8
+            if self.speed <=1.5:
+                self.speed = 0
+
+        if self.reverse == True and self.speed==0:
+            self.reversing = True
+
+        if self.reversing == True and self.reverse == True and self.speed<8:
+            self.speed +=0.3
+         
+
 
         if self.onTrack == False and self.speed>8:
-            self.speed -=2
+            self.speed -=3
+        
         
 
         
@@ -364,6 +550,8 @@ class Car(pygame.sprite.Sprite):
         if self.speed == 0:
             self.xspeed = 0
             self.yspeed = 0
+        
+        self.kmh = int(self.speed*5)
 
 
 
@@ -375,10 +563,135 @@ class Car(pygame.sprite.Sprite):
         self.image = rotated_image
         self.rect = rotated_image.get_rect(center = rotated_image_center)
 
+        
+
+        if self.reversing == True:
+            self.xspeed *=-1
+            self.yspeed *=-1
+        
 
         self.rect.move_ip(self.xspeed, self.yspeed)  
 
 
+def createTrack2():
+
+    global checkpoints
+    checkpoints = []
+    completed = False
+
+
+    track = LongHorizontalTrack()
+    track.rect.topleft = (580,750)
+    TrackPieces.add(track)
+
+    track = LongHorizontalTrack()
+    track.rect.topleft = (780,750)
+    TrackPieces.add(track)
+
+    track = LongHorizontalTrack()
+    track.rect.topleft = (980,750)
+    TrackPieces.add(track)
+
+    track = LongCurveBRTrack()
+    track.rect.topleft = (1180,562)
+    TrackPieces.add(track)
+
+    track = ShortVerticalTrack()
+    track.rect.topleft = (1472,462)
+    checkpoints.append([1, track.rect.center, completed, track.rect.width, track.rect.height])
+    TrackPieces.add(track)
+
+    track = LongCurveTRTrack()
+    track.rect.topleft = (1284,70)
+    TrackPieces.add(track)
+
+    track = ShortHorizontalTrack()
+    track.rect.topleft = (1184,70)
+    checkpoints.append([2, track.rect.center, completed, track.rect.width, track.rect.height])
+    TrackPieces.add(track)
+
+    track = CurveTLTrack()
+    track.rect.topleft = (1034,70)
+    TrackPieces.add(track)
+
+    track = LongVerticalTrack()
+    track.rect.topleft = (1034,220)
+    checkpoints.append([3, track.rect.center, completed, track.rect.width, track.rect.height])
+    TrackPieces.add(track)
+
+    track = ShortVerticalTrack()
+    track.rect.topleft = (1034,420)
+    TrackPieces.add(track)
+
+    track = CurveBRTrack()
+    track.rect.topleft = (984,520)
+    checkpoints.append([4, track.rect.center, completed, track.rect.width, track.rect.height])
+    TrackPieces.add(track)
+
+    track = CurveBLTrack()
+    track.rect.topleft = (834,520)
+    TrackPieces.add(track)
+
+    track = ShortVerticalTrack()
+    track.rect.topleft = (834,420)
+    TrackPieces.add(track)
+
+    track = LongVerticalTrack()
+    track.rect.topleft = (834,220)
+    checkpoints.append([5, track.rect.center, completed, track.rect.width, track.rect.height])
+    TrackPieces.add(track)
+
+    track = CurveTRTrack()
+    track.rect.topleft = (784,70)
+    checkpoints.append([6, track.rect.center, completed, track.rect.width, track.rect.height])
+    TrackPieces.add(track)
+
+    track = CurveTLTrack()
+    track.rect.topleft = (634,70)
+    TrackPieces.add(track)
+
+    track = CurveBRTrack()
+    track.rect.topleft = (584,220)
+    TrackPieces.add(track)
+
+    track = LongHorizontalTrack()
+    track.rect.topleft = (384,270)
+    TrackPieces.add(track)
+
+    track = ShortHorizontalTrack()
+    track.rect.topleft = (284,270)
+    checkpoints.append([7, track.rect.center, completed, track.rect.width, track.rect.height])
+    TrackPieces.add(track)
+
+    track = CurveTLTrack()
+    track.rect.topleft = (134,270)
+    TrackPieces.add(track)
+
+    track = LongVerticalTrack()
+    track.rect.topleft = (134,420)
+    checkpoints.append([8, track.rect.center, completed, track.rect.width, track.rect.height])
+    TrackPieces.add(track)
+
+    track = ShortVerticalTrack()
+    track.rect.topleft = (134,620)
+    TrackPieces.add(track)
+
+    track = CurveBLTrack()
+    track.rect.topleft = (134,700)
+    TrackPieces.add(track)
+
+    track = LongHorizontalTrack()
+    track.rect.topleft = (284,750)
+    TrackPieces.add(track)
+
+    track = ShortHorizontalTrack()
+    track.rect.topleft = (484,750)
+    TrackPieces.add(track)
+
+    track = StartHorizontalTrack()
+    track.rect.topleft = (550,750)
+    checkpoints.append([9, track.rect.center, completed, track.rect.width, track.rect.height])
+    TrackPieces.add(track)
 
 def createOvalTrack():
 
@@ -442,8 +755,33 @@ def createOvalTrack():
     checkpoints.append([4, track.rect.center, completed, track.rect.width, track.rect.height])
     TrackPieces.add(track)
 
-    #print(checkpoints[3][0])
+    
+def treeCollisionCheck(car, Treetrunks):
 
+    for treetrunk in Treetrunks:
+        collided = pygame.sprite.collide_mask(car,treetrunk)
+        if collided:
+            collidepoint = pygame.sprite.collide_mask(car,treetrunk)
+            if car.rect.centerx < collidepoint[0]:
+                car.rect.centerx -= 1
+            else:
+                car.rect.centerx += 1
+
+            if car.rect.centery < collidepoint[1]:
+                car.rect.centery -= 1
+            else:
+                car.rect.centery += 1
+
+            car.speed = 0
+            #if car.accelerate == True:
+             #   car.accelerate = False
+              #  car.reversing = True
+            #elif car.reversing == True:
+             #   car.reversing = False
+                
+                
+            #elif car.accelerate == False and car.reversing == False:
+             #   car.reversing = True
     
 
 def checkpointsCheck (car, checkpoints):
@@ -519,12 +857,62 @@ def checkpointsCheck (car, checkpoints):
 
         for y in range(length):
             checkpoints[y][2] = False
+
+def setTreePosition(newtree):
+    global treeTopLeft
+    global cantSetTreeHere
+    cantSetTreeHere = False
+
+    randx = random.randint(-60,width)
+    randy = random.randint(-60,height)
+    newtree.rect.topleft = (randx,randy)
+
+    for track in TrackPieces:
+        collided = pygame.sprite.collide_mask(newtree,track)
+        if collided:
+            cantSetTreeHere = True
     
+    if cantSetTreeHere == False and len(Trees) > 0:
+        for tree in Trees:
+            collided = pygame.sprite.collide_mask(newtree,tree)
+            if collided:
+                cantSetTreeHere = True
+
+    if cantSetTreeHere == True:
+        setTreePosition(newtree)
 
 
-        
+def setTrees(number):     
+    global treeTopLeft
+    global cantSetTreeHere
     
-    
+    for x in range(number):
+        treetype = random.randint(1,3)
+        if treetype == 1:
+            newtree = Tree1()
+            setTreePosition(newtree)
+            if cantSetTreeHere == False:
+                Trees.add(newtree)
+                treetrunk = TreeTrunk()
+                treetrunk.rect.center = newtree.rect.center
+                Treetrunks.add(treetrunk)
+        if treetype == 2:
+            newtree = Tree2()
+            setTreePosition(newtree)
+            if cantSetTreeHere == False:
+                Trees.add(newtree)
+                treetrunk = TreeTrunk()
+                treetrunk.rect.center = newtree.rect.center
+                Treetrunks.add(treetrunk)
+        if treetype == 3:
+            newtree = Tree3()
+            setTreePosition(newtree)
+            if cantSetTreeHere == False:
+                Trees.add(newtree)
+                treetrunk = TreeTrunk()
+                treetrunk.rect.center = newtree.rect.center
+                Treetrunks.add(treetrunk)
+            
 
 
 def blitRotate(image, pos, originPos, angle):
@@ -548,10 +936,18 @@ def blitRotate(image, pos, originPos, angle):
     rotated_image_rect = rotated_image.get_rect(center = rotated_image_center)
 
 TrackPieces = pygame.sprite.Group()
+Trees = pygame.sprite.Group()
+Treetrunks = pygame.sprite.Group()
 car1 = Car()
-car1.rect.topleft = (600,600)
 
-createOvalTrack()
+
+#car1.rect.topleft = (600,600)
+#createOvalTrack()
+car1.rect.topleft = (500,800)
+createTrack2()
+
+setTrees(150)
+print(len(Trees))
 
 timer = 0
 race_countdown = 3
@@ -573,6 +969,8 @@ while running:
 
     # Get the set of keys pressed and check for user input
     pressed_keys = pygame.key.get_pressed()
+
+    treeCollisionCheck(car1, Treetrunks)
 
     if car1.lapsCompleted == race_length:
         raceStarted = False
@@ -599,6 +997,7 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
                 car1.accelerate = True
+                
                 
 
             if event.key == pygame.K_DOWN:
@@ -644,7 +1043,9 @@ while running:
     if raceStarted == True:
         car1.update()
     TrackPieces.draw(window)
+    
     window.blit(car1.Rotated_image, car1.rect.topleft)
+    Trees.draw(window)
 
     laps_completed_text = font1.render('Laps completed: '+str(car1.lapsCompleted) +"/"+str(race_length), True, (0,0,0))
     laps_completed_textRect.center = (width *0.45, 20)
@@ -674,6 +1075,9 @@ while running:
     best_lap_text = font1.render("Best lap: "+ best_lap, True, (0,0,0))
     best_lap_textRect.center = (width *0.02, 20)
     window.blit(best_lap_text, best_lap_textRect)
+    speed_text = font1.render("Speed (km/h): "+ str(car1.kmh), True, (0,0,0))
+    speed_textRect.center = (width *0.85, 20)
+    window.blit(speed_text, speed_textRect)
   
     checkpointsCheck(car1, checkpoints)
 
