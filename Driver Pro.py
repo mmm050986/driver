@@ -49,7 +49,7 @@ tree2 = pygame.transform.scale(tree2,(60,60))
 tree3 = pygame.image.load("tree3.gif").convert()
 tree3 = pygame.transform.scale(tree3,(60,60))
 tree4 = pygame.image.load("tree3.gif").convert()
-tree4 = pygame.transform.scale(tree4,(20,20))
+tree4 = pygame.transform.scale(tree4,(15,15))
 
 font1 = pygame.font.Font(None, 32)
 
@@ -83,6 +83,11 @@ cantSetTreeHere = True
 global half_second, car_kmh
 car_kmh = 0
 half_second = 0
+global justCollided
+justCollided = False
+global canReverse, canAccelerate
+canReverse = True
+canAccelerate = True
 
 class TreeTrunk(pygame.sprite.Sprite):
     def __init__(self):
@@ -513,7 +518,7 @@ class Car(pygame.sprite.Sprite):
             self.reversing = True
         # adjust the reversing speed of the car - max reversing speed = 8
         if self.reversing == True and self.reverse == True and self.speed<8:
-            self.speed +=0.3
+            self.speed +=0.9
          
 
         # slow the car down if it is off the track and going faster than 8
@@ -561,6 +566,8 @@ class Car(pygame.sprite.Sprite):
         
         # move the car
         self.rect.move_ip(self.xspeed, self.yspeed)  
+
+        
 
 # create track number 2
 def createTrack2():
@@ -749,33 +756,119 @@ def createOvalTrack():
     checkpoints.append([4, track.rect.center, completed, track.rect.width, track.rect.height])
     TrackPieces.add(track)
 
-    
+# function to detect collision with trees  
 def treeCollisionCheck(car, Treetrunks):
+    global justCollided
+    global canReverse, canAccelerate
 
+    # for loop checks each tree for collision
     for treetrunk in Treetrunks:
         collided = pygame.sprite.collide_mask(car,treetrunk)
         if collided:
-            collidepoint = pygame.sprite.collide_mask(car,treetrunk)
-            if car.rect.centerx < collidepoint[0]:
-                car.rect.centerx -= 1
-            else:
-                car.rect.centerx += 1
-
-            if car.rect.centery < collidepoint[1]:
-                car.rect.centery -= 1
-            else:
-                car.rect.centery += 1
-
-            car.speed = 0
-            #if car.accelerate == True:
-             #   car.accelerate = False
-              #  car.reversing = True
-            #elif car.reversing == True:
-             #   car.reversing = False
+            #check whether the car can go forward or backward based on its relative position to the tree it has collided with
+            if car.orientation == 0:
+                if car.rect.centerx<treetrunk.rect.centerx and car.rect.centery>treetrunk.rect.centery-20: 
+                  
+                    canReverse = True
+                    canAccelerate = False
                 
+                if car.rect.centerx<treetrunk.rect.centerx and car.rect.centery<=treetrunk.rect.centery-20: 
+                  
+                    canReverse = False
+                    canAccelerate = True
+            
+                if car.rect.centerx>treetrunk.rect.centerx and car.rect.centery<treetrunk.rect.centery+20:
+                 
+                    canReverse = False
+                    canAccelerate = True
+
+                if car.rect.centerx>treetrunk.rect.centerx and car.rect.centery>=treetrunk.rect.centery+20:
+               
+                    canReverse = True
+                    canAccelerate = False
+
+            if car.orientation == 3:
+                if car.rect.centerx<treetrunk.rect.centerx and car.rect.centery<treetrunk.rect.centery+20: 
                 
-            #elif car.accelerate == False and car.reversing == False:
-             #   car.reversing = True
+                    canReverse = True
+                    canAccelerate = False
+                
+                if car.rect.centerx<treetrunk.rect.centerx and car.rect.centery>=treetrunk.rect.centery+20: 
+                   
+                    canReverse = False
+                    canAccelerate = True
+            
+                if car.rect.centerx>treetrunk.rect.centerx and car.rect.centery>treetrunk.rect.centery-20:
+                    
+                    canReverse = False
+                    canAccelerate = True
+
+                if car.rect.centerx>treetrunk.rect.centerx and car.rect.centery<=treetrunk.rect.centery-20:
+                    
+                    canReverse = True
+                    canAccelerate = False
+            
+            if car.orientation == 1:
+                if car.rect.centerx<treetrunk.rect.centerx and car.rect.centery<treetrunk.rect.centery+20: 
+                  
+                    canReverse = False
+                    canAccelerate = True
+                
+                if car.rect.centerx<treetrunk.rect.centerx and car.rect.centery>=treetrunk.rect.centery+20: 
+                  
+                    canReverse = True
+                    canAccelerate = False
+            
+                if car.rect.centerx>treetrunk.rect.centerx and car.rect.centery>treetrunk.rect.centery-20:
+                 
+                    canReverse = True
+                    canAccelerate = False
+
+                if car.rect.centerx>treetrunk.rect.centerx and car.rect.centery<=treetrunk.rect.centery-20:
+               
+                    canReverse = False
+                    canAccelerate = True
+
+            if car.orientation == 2:
+                if car.rect.centerx<treetrunk.rect.centerx and car.rect.centery>treetrunk.rect.centery-20: 
+                
+                    canReverse = False
+                    canAccelerate = True
+                
+                if car.rect.centerx<treetrunk.rect.centerx and car.rect.centery<=treetrunk.rect.centery-20: 
+                   
+                    canReverse = True
+                    canAccelerate = False
+            
+                if car.rect.centerx>treetrunk.rect.centerx and car.rect.centery<treetrunk.rect.centery+20:
+                    
+                    canReverse = True
+                    canAccelerate = False
+
+                if car.rect.centerx>treetrunk.rect.centerx and car.rect.centery>=treetrunk.rect.centery+20:
+                    
+                    canReverse = False
+                    canAccelerate = True
+           
+            
+
+            #if the car has just collided with a tree, change car to opposite direction and slow down the car
+            if justCollided == False:
+                car.speed = car.speed *0.3
+                if car.speed == 0:
+                    car.speed = 1.5
+                if car.reversing == True:
+                    car.reversing = False
+            
+                else:
+                    car.reversing = True
+                    car.accelerate = False
+                # set justCollided to true and set timer to wait for half a second before continuing to check for future collisions
+                justCollided = True
+                pygame.time.set_timer(COLLISION, 500)
+           
+                   
+
     
 # function to check if the car is completing the necessary checkpoints in order to have a successfully completed lap
 # function also records successful lap times and best lap times
@@ -784,6 +877,7 @@ def checkpointsCheck (car, checkpoints):
     global lap_time
     global best_lap
     global previous_lap, best_lap, bestLapSeconds
+    global race_length
     length = len(checkpoints)
 
     # for loop runs through the checkpoints in the checkpoints list
@@ -856,9 +950,10 @@ def checkpointsCheck (car, checkpoints):
         # reset the lap time
         lap_time = 0
 
-        # print out lap times in terminal
+        # print out lap times in terminal after race ends
+
         length2 = len(laptimes)
-        if length2>0:
+        if length2==race_length:
             for y in range(length2):
                 print((laptimes[y][0]),(laptimes[y][1]))
         
@@ -990,6 +1085,7 @@ raceStarted = False
 # set the timer to record lap times and race time
 RACESTART = pygame.USEREVENT + 1
 pygame.time.set_timer(RACESTART, 1)
+COLLISION = pygame.USEREVENT +2
 
 
 running = True
@@ -1026,16 +1122,22 @@ while running:
        
         # check which directional keys the user is pressing
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
+            if event.key == pygame.K_UP and justCollided == False:
+                car1.accelerate = True
+
+            if event.key == pygame.K_UP and justCollided == True  and canAccelerate == True:
                 car1.accelerate = True
                 
-            if event.key == pygame.K_DOWN:
+            if event.key == pygame.K_DOWN and justCollided == False:
+                car1.reverse = True
+            
+            if event.key == pygame.K_DOWN and justCollided == True and canReverse == True:
                 car1.reverse = True
 
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_LEFT and justCollided == False:
                 car1.turnleft = True
 
-            if event.key == pygame.K_RIGHT:
+            if event.key == pygame.K_RIGHT and justCollided == False:
                 car1.turnright = True
         
         if event.type == pygame.KEYUP:
@@ -1073,6 +1175,11 @@ while running:
                 if seconds >= 60:
                     seconds = 0
                     minutes+=1
+
+        if event.type == COLLISION:
+            justCollided = False
+            pygame.time.set_timer(COLLISION, 0)
+
 
     # allow the car to move once the race has started
     if raceStarted == True:
