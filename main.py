@@ -2,7 +2,7 @@ from multiprocessing.connection import answer_challenge
 import pygame
 import random
 from car import *
-from onBridgeCheck import *
+
 import math
 import sqlite3
 from pygame.locals import *
